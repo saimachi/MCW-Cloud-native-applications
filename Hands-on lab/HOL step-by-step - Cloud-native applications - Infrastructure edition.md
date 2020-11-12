@@ -390,13 +390,13 @@ In this task, you will create Docker images for the application --- one for the 
    docker image build -t content-init .
    ```
 
-11. When complete, you will see seven images now exist when you run the Docker images command.
+11. When complete, you will see eight images now exist when you run the Docker images command.
 
    ```bash
    docker image ls
    ```
 
-   ![Three images are now visible in this screenshot of the console window: content-web, content-api, and node.](media/image60.png)
+   ![Three images are now visible in this screenshot of the console window: content-web, content-api, and node.](media/NewDockerContainerImages.PNG)
 
 ### Task 4: Run a containerized application
 
@@ -419,22 +419,24 @@ The web application container will be calling endpoints exposed by the API appli
 2. The `docker container run` command has failed because it is configured to connect to mongodb using a localhost URL. However, now that content-api is isolated in a separate container, it cannot access mongodb via localhost even when running on the same docker host. Instead, the API must use the bridge network to connect to mongodb.
 
    ```text
-   > content-api@0.0.0 start /usr/src/app
+   > content-api@0.0.0 start
    > node ./server.js
 
    Listening on port 3001
    Could not connect to MongoDB!
-   MongoTimeoutError: Server selection timed out after 30000 ms
-   npm ERR! code ELIFECYCLE
-   npm ERR! errno 255
-   npm ERR! content-api@0.0.0 start: `node ./server.js`
-   npm ERR! Exit status 255
-   npm ERR!
-   npm ERR! Failed at the content-api@0.0.0 start script.
-   npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+   MongooseServerSelectionError: connect ECONNREFUSED 127.0.0.1:27017
+   npm notice
+   npm notice New patch version of npm available! 7.0.8 -> 7.0.10
+   npm notice Changelog: <https://github.com/npm/cli/releases/tag/v7.0.10>
+   npm notice Run `npm install -g npm@7.0.10` to update!
+   npm notice
+   npm ERR! code 255
+   npm ERR! path /usr/src/app
+   npm ERR! command failed
+   npm ERR! command sh -c node ./server.js
 
    npm ERR! A complete log of this run can be found in:
-   npm ERR!     /root/.npm/_logs/2019-12-04T22_39_38_815Z-debug.log
+   npm ERR!     /root/.npm/_logs/2020-11-12T01_52_56_039Z-debug.log
    ```
 
 3. The content-api application allows an environment variable to configure the mongodb connection string. Remove the existing container, and then instruct the docker engine to set the environment variable by adding the `-e` switch to the `docker container run` command. Also, use the `-d` switch to run the api as a daemon.
@@ -478,6 +480,8 @@ The web application container will be calling endpoints exposed by the API appli
    ```bash
    curl http://localhost:[PORT]/speakers.html
    ```
+
+   >**Note**: In the example above, [PORT] would be 32768.
 
 ### Task 5: Setup environment variables
 
@@ -601,7 +605,7 @@ Managing several containers with all their command line options can become diffi
        restart: always
 
      api:
-       build: ./content-api
+       build: ./Fabmedical/content-api
        image: content-api
        depends_on:
          - mongo
@@ -609,7 +613,7 @@ Managing several containers with all their command line options can become diffi
          MONGODB_CONNECTION: mongodb://mongo:27017/contentdb
 
      web:
-       build: ./content-web
+       build: ./Fabmedical/content-web
        image: content-web
        depends_on:
          - api
@@ -673,7 +677,7 @@ Managing several containers with all their command line options can become diffi
 
    services:
      init:
-       build: ./content-init
+       build: ./Fabmedical/content-init
        image: content-init
        depends_on:
          - mongo
@@ -753,7 +757,7 @@ In this task, you will push images to your ACR account, version images with tagg
    docker image ls
    ```
 
-   ![This is a screenshot of a docker images list example.](media/image66.png)
+   ![This is a screenshot of a docker images list example.](media/DockerImagesInAzureCR.PNG)
 
 7. Push the images to your ACR account with the following command:
 
@@ -778,6 +782,7 @@ In this task, you will push images to your ACR account, version images with tagg
     ```bash
     docker image tag [LOGINSERVER]/content-web:latest [LOGINSERVER]/content-web:v1
     docker image tag [LOGINSERVER]/content-api:latest [LOGINSERVER]/content-api:v1
+    docker image tag [LOGINSERVER]/content-init:latest [LOGINSERVER]/content-init:v1
     docker image ls
     ```
 
@@ -785,7 +790,7 @@ In this task, you will push images to your ACR account, version images with tagg
 
 11. Repeat Step 7 to push the images to ACR again so that the newly tagged `v1` images are pushed. Then refresh one of the repositories to see the two versions of the image now appear.
 
-    ![In this screenshot, content-api is selected under Repositories, and the Tags blade appears on the right. In the Tags blade, latest and v1 appear under Tags.](media/image71.png)
+    ![In this screenshot, content-api is selected under Repositories, and the Tags blade appears on the right. In the Tags blade, latest and v1 appear under Tags.](media/AzureCRContainersWithTags.PNG)
 
 12. Run the following commands to pull an image from the repository. Note that the default behavior is to pull images tagged with `latest`. You can pull a specific version using the version tag. Also, note that since the images already exist on the build agent, nothing is downloaded.
 
@@ -918,13 +923,13 @@ image and pushes it to your ACR instance automatically.
 
     ![Build and Push Docker Image job](media/2020-08-25-15-42-11.png "Build and Push Docker Image job")
 
-17. Next, setup the `content-api` workflow. This repository already includes `` located within the `.github/workflows` directory. Open the `.github/workflows/content-api.yml` file for editing.
+17. Next, setup the `content-api` workflow. This repository already includes the workflow file located within the `.github/workflows` directory. Open the `.github/workflows/content-api.yml` file for editing.
 
-18. Edit the `resourceGroupName` and `containerRegistry` environment values to replace `[SHORT_SUFFIX]` with your own three-letter suffix so that it matches your container registry's name and resource group.
+18. Edit the `resourceGroupName`, `containerRegistryName`, and `containerRegistry` environment values to replace `[SHORT_SUFFIX]` with your own three-letter suffix so that it matches your container registry's name and resource group.
 
     ![Screenshot of content-api.yml with the environment variables highlighted](media/2020-08-25-15-59-56.png "Screenshot of content-api.yml with the environment variables highlighted")
 
-19. Save the file, then navigate to the repositories in GitHub, select Actions, and then manually run the **content-api** workflow.
+19. Save the file, commit, and push. Then navigate to the repositories in GitHub, select Actions, and then manually run the **content-api** workflow.
 
 20. Next, setup the **content-init** workflow. Follow the same steps as the previous `content-api` workflow for the `content-init.yml` file, remembering to update the `[SHORT_SUFFIX]` value with your own three-letter suffix.
 

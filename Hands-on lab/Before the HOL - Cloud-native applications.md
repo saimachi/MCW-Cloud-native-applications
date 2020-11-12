@@ -355,6 +355,10 @@ FabMedical has provided starter files for you. They have taken a copy of the web
 
     > **Note**: If you have multi-factor authentication, you will need to create a personal access token when using the cloud shell. Reference the following link for help with setting up a GitHub personal access token to use for authenticating `git` with your GitHub account: <https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token>.
 
+    > **Note**: Ensure that your personal access token enables the *repo* and *workflow* scopes.
+
+    ![Ensuring that the repo and workflow scopes are enabled for access token.](media/PersonalAccessToken.PNG "Proper scopes for access token")  
+
     > **Note**: Once you have your personal access token, retry the above command, use your token as the password.
 
 14. Refresh your GitHub repository, you should now see the code published.
