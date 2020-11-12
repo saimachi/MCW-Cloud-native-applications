@@ -1026,7 +1026,7 @@ In this task, you will gather the information you need about your Azure Kubernet
 
 In this task, you will deploy the API application to the Azure Kubernetes Service cluster using the Kubernetes dashboard.
 
-1. From the Kubernetes dashboard, select **Create** in the top right corner.
+1. From the Kubernetes dashboard, select **Create** in the top right corner (the **+** button).
 
 2. From the Resource creation view, select **Create an App**.
 
@@ -1056,11 +1056,11 @@ In this task, you will deploy the API application to the Azure Kubernetes Servic
 
 5. Kubernetes indicates a problem with the `api` **Replica Set** after some seconds. Select the log icon to investigate.
 
-   ![This screenshot of the Kubernetes management dashboard shows an error with the replica set.](media/Ex2-Task1.5.png)
+   ![This screenshot of the Kubernetes management dashboard shows an error with the replica set.](media/FailedReplicaSet.png)
 
 6. The log indicates that the content-api application is once again failing because it cannot find a mongodb instance to communicate with. You will resolve this issue by migrating your data workload to Cosmos DB.
 
-   ![This screenshot of the Kubernetes management dashboard shows logs output for the api container.](media/Ex2-Task1.6.png)
+   ![This screenshot of the Kubernetes management dashboard shows logs output for the api container.](media/FailedKubernetesReplicaSetLog.PNG)
 
 7. Open the Azure portal in your browser and navigate to your resource group and find your Cosmos DB resource. Select the Cosmos DB resource to view details.
 
