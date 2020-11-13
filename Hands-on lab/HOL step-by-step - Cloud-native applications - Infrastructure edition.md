@@ -185,6 +185,7 @@ The purpose of this task is to make sure you can run the application successfull
    > ```bash
    > sudo chown -R $USER:$(id -gn $USER) /home/adminfabmedical/.config
    > ```
+   > **Note**: The `content-init` directory is accessed with respect to your local repository root (e.g. `/home/[USER]/Fabmedical`)
 
 7. Initialize the database.
 
@@ -396,7 +397,7 @@ In this task, you will create Docker images for the application --- one for the 
    docker image ls
    ```
 
-   ![Three images are now visible in this screenshot of the console window: content-web, content-api, and node.](media/NewDockerContainerImages.PNG)
+   ![Four images are now visible in this screenshot of the console window: content-web, content-api, and node.](media/NewDockerContainerImages.PNG)
 
 ### Task 4: Run a containerized application
 
@@ -826,7 +827,7 @@ image and pushes it to your ACR instance automatically.
    cd ~/Fabmedical
    ```
 
-7. Before the GitHub Actions workflows can be setup, the `.github/workflows` directory needs to be created. Do this by running the following commands:
+7. Before the GitHub Actions workflows can be setup, the `.github/workflows` directory needs to be created, if it does not already. Do this by running the following commands:
 
     ```bash
     mkdir ~/Fabmedical/.github
@@ -1310,6 +1311,8 @@ In this task, you will deploy the web service using a [Helm](https://helm.sh/) c
     git pull
    ```
 
+   >**Note**: Many of the configuration changes described from this point on are already included. However, you should still ensure that the proper values are set.
+
 7. We will use the chart scaffold implementation that we have available in the source code. Use the following commands to access the chart folder:
 
     ```bash
@@ -1448,7 +1451,7 @@ In this task, you will deploy the web service using a [Helm](https://helm.sh/) c
     helm install web ./web
     ```
 
-    ![In this screenshot of the console, helm install web ./web has been typed and run at the command prompt. Messages about web deployment and web service creation appear below.](media/Ex2-Task4.24.png)
+    ![In this screenshot of the console, helm install web ./web has been typed and run at the command prompt. Messages about web deployment and web service creation appear below.](media/HelmDeploymentConsole.png)
 
 24. Return to the browser where you have the Kubernetes management dashboard open. From the navigation menu, select **Services** view under **Discovery and Load Balancing**. From the Services view, select the web service, and from this view, you will see the web service deploying. This deployment can take a few minutes. When it completes, you should be able to access the website via an external endpoint.
 
@@ -1468,11 +1471,13 @@ In this task, you will deploy the web service using a [Helm](https://helm.sh/) c
     git push
     ```
 
+    >**Note**: If you receive any errors with the ```git pull``` or ```git push``` commands, specify a remote and a branch (e.g. ```git pull origin master```)
+
 ### Task 5: Initialize database with a Kubernetes Job
 
 In this task, you will use a Kubernetes Job to run a container that is meant to execute a task and terminate, rather than run all the time.
 
-1. Create a text file called `init.job.yml` using the Azure Cloud Shell Editor.
+1. Create a text file called `init.job.yml` using the Azure Cloud Shell Editor. It can be located in your home directory.
 
    ```bash
    code init.job.yml
@@ -1548,7 +1553,7 @@ In this task, you will use GitHub Actions workflows to automate the process for 
 1. Navigate to the `.github/workflows` folder of the git repository, and open the `content-web.yml` workflow using `vi`:
 
     ```bash
-    cd ~/MCW-Cloud-native-applications/Hands-on\ lab/lab-files/developer/.github/workflows
+    cd ~/MCW-Cloud-native-applications/Hands-on\ lab/lab-files/infrastructure/.github/workflows
     vi content-web.yml
     ```
 
@@ -1594,7 +1599,7 @@ In this task, you will use GitHub Actions workflows to automate the process for 
             HELM_EXPERIMENTAL_OCI: 1
     ```
 
-3. Save the file.
+3. Save the file.  
 
 4. In the Azure Cloud Shell, use the following command to output the `/.kube/config` file that contains the credentials for authenticating with Azure Kubernetes Service. These credentials were retrieved previously, and will also be needed by GitHub Actions to deploy to AKS. Then copy the contents of the file.
 
@@ -1645,7 +1650,13 @@ In this task, you will use GitHub Actions workflows to automate the process for 
             HELM_EXPERIMENTAL_OCI: 1
     ```
 
-8. Save the file.
+8. Save the file. Then commit and push.
+
+   ```bash
+   git add .
+   git commit -m "New additions to content-web workflow"
+   git push origin master
+   ```
 
 9. On the **content-web** workflow, select **Run workflow** and manually trigger the workflow to execute.
 
@@ -1653,7 +1664,7 @@ In this task, you will use GitHub Actions workflows to automate the process for 
 
 10. Selecting the currently running workflow will display it's status.
 
-    ![Workflow is running](media/2020-08-25-22-15-39.png "Workflow is running")
+    ![Workflow is running](media/KubernetesCD.PNG "Workflow is running")
 
 ### Task 8: Review Azure Monitor for Containers
 
@@ -1687,7 +1698,7 @@ In this task, you will access and review the various logs and dashboards made av
 
    ![In this screenshot, the pod cpu usage details are shown.](media/monitor_4.png)
 
-8. To display the logs for any container simply select it and view the right panel and you will find **View container logs** option which will list all logs for this specific container.
+8. To display the logs for any container simply select it and view the right panel and you will find **View container logs** option which will list all logs for this specific container. **Get Started** with Log Analytics if you are asked to.
 
    ![In the View in Analytics dropdown, the View container logs item is selected.](media/monitor_5.png)
 
@@ -1715,7 +1726,7 @@ In this task, you will increase the number of instances for the API deployment i
 
 3. Change the number of pods to `2`, and then select **OK**.
 
-   ![In the Scale a Deployment dialog box, 2 is entered in the Desired number of pods box.](media/image116.png)
+   ![In the Scale a resource dialog box, 2 is entered in the Desired number of replicas box.](media/image116.png)
 
    > **Note**: If the deployment completes quickly, you may not see the deployment Waiting states in the dashboard, as described in the following steps.
 
@@ -1765,9 +1776,7 @@ In this task, you will try to increase the number of instances for the API servi
 
    ![In the Workloads > Deployments > api bar, the Edit icon is highlighted.](media/image81.png)
 
-3. In the **Edit a Deployment** dialog, you will see a list of settings shown in JSON format. Use the copy button to copy the text to your clipboard.
-
-   ![Screenshot of the Edit a Deployment dialog box that displays JSON data.](media/image82.png)
+3. In the **Edit a resource** dialog, you will see a list of settings shown in JSON format (you need to first press the JSON tab). Copy the text to your clipboard.
 
 4. Paste the contents into the text editor of your choice _(notepad is shown here, macOS users can use TextEdit)_.
 
@@ -1812,7 +1821,7 @@ In this task, you will try to increase the number of instances for the API servi
 
 9. Change the number of pods to `4` and select **OK**.
 
-   ![In the Scale a Deployment dialog box, 4 is entered in the Desired number of pods box.](media/image119.png)
+   ![In the Scale a resource dialog box, 4 is entered in the Desired number of replicas box.](media/ScalePodsTo4.PNG)
 
 10. From the navigation menu, select **Services** view under **Discovery and Load Balancing**. Select the **api** service from the **Services** list. From the api service view, you will see it has two healthy instances and two unhealthy (or possibly pending depending on timing) instances.
 
@@ -1844,7 +1853,7 @@ In this task, you will restart containers and validate that the restart does not
 
    ![In the left menu the Deployments item is selected. The API deployment is highlighted in the Deployments list box.](media/image124.png)
 
-3. From the API deployment view, select **Scale** and from the dialog presented, and enter `4` for the desired number of pods. Select **OK**.
+3. From the API deployment view, select **Scale** and from the dialog presented, and enter `4` for the desired number of replicas. Select **Scale**.
 
 4. From the navigation menu, select **Workloads** -> **Replica Sets**. Select the `api` replica set, and from the Replica Set view, you will see that two pods cannot deploy.
 
@@ -1870,9 +1879,9 @@ In this task, you will restart containers and validate that the restart does not
 
 10. From the navigation menu, select **Deployments** under **Workloads**. From the view's Deployments list, select the **API** deployment.
 
-11. From the API Deployment view, select Scale and enter `1` as the desired number of pods. Select **OK**.
+11. From the API Deployment view, select Scale and enter `1` as the desired number of replicas. Select **Scale**.
 
-    ![In the Scale a Deployment dialog box, 1 is entered in the Desired number of pods box.](media/image130.png)
+    ![In the Scale a resource dialog box, 1 is entered in the Desired number of replicas box.](media/ScalePodsTo1.PNG)
 
 12. Return to the web site's stats page in the browser and refresh while this is scaling down. You will notice that only one API host name shows up, even though you may still see several running pods in the API replica set view. Even though several pods are running, Kubernetes will no longer send traffic to the pods it has selected to scale down. In a few moments, only one pod will show in the API replica set view.
 
@@ -1898,13 +1907,13 @@ In this task, we will reconfigure the API deployment so that it will produce pod
 
 2. Select **Edit**.
 
-3. From the **Edit a Deployment** dialog, do the following:
+3. From the **Edit a resource** dialog, do the following:
 
    - Scroll to the first spec node that describes replicas as shown in the screenshot. Set the value for replicas to `4`.
 
    - Within the replicas spec, beneath the template node, find the `api` containers spec. Remove the hostPort entry for the API container's port mapping.  The screenshot below shows the desired configuration after editing.
 
-     ![This is a screenshot of the Edit a Deployment dialog box with various displayed information about spec, selector, and template. Under the spec node, replicas: 4 is highlighted. Further down, ports are highlighted.](media/image137.png)
+     ![This is a screenshot of the Edit a resource dialog box with various displayed information about spec, selector, and template. Under the spec node, replicas: 4 is highlighted. Further down, ports are highlighted.](media/UpdateResourceJson.png)
 
 4. Select **Update**. New pods will now choose a dynamic port.
 
@@ -1922,13 +1931,15 @@ In this task, you will update the web service so that it supports dynamic discov
 
 2. Select **Edit**.
 
-3. From the **Edit a Deployment** dialog, scroll to the web containers spec as shown in the screenshot. Remove the `hostPort` entry for the web container's port mapping.
+3. From the **Edit a resource** dialog, scroll to the web containers spec as shown in the screenshot. Remove the `hostPort` entry for the web container's port mapping.
 
-   ![This is a screenshot of the Edit a Deployment dialog box with various displayed information about spec, containers, ports, and env. The ports node, containerPort: 3001 and protocol: TCP are highlighted.](media/image140.png)
+   ![This is a screenshot of the Edit a resource dialog box with various displayed information about spec, containers, ports, and env. The ports node, containerPort: 3001 and protocol: TCP are highlighted.](media/RemovedHostPortSettingWeb.png)
+
+   >**Note**: It is possible that your line numbers may be different.
 
 4. Select **Update**.
 
-5. From the web Deployments view, select **Scale**. From the dialog presented enter 4 as the desired number of pods and select **OK**.
+5. From the web Deployments view, select **Scale**. From the dialog presented enter 4 as the desired number of replicas and select **Scale**.
 
 6. Check the status of the scale out by refreshing the web deployment's view. From the navigation menu, select Deployments from under Workloads. Select the web deployment. From this view, you should see an error like that shown in the following screenshot.
 
@@ -1944,9 +1955,9 @@ In this task, you will modify the CPU requirements for the web service so that i
 
 2. Select **Edit**.
 
-3. From the Edit a Deployment dialog, find the `cpu` resource requirements for the web container. Change this value to `125m`.
+3. From the Edit a resource dialog, find the `cpu` resource requirements for the web container. Change this value to `125m`.
 
-   ![This is a screenshot of the Edit a Deployment dialog box with various displayed information about ports, env, and resources. The resources node, with cpu: 125m selected, is highlighted.](media/image142.png)
+   ![This is a screenshot of the Edit a resource dialog box with various displayed information about ports, env, and resources. The resources node, with cpu: 125m selected, is highlighted.](media/CPUResourceSettingsChanged.png)
 
 4. Select **Update** to save the changes and update the deployment.
 
@@ -2045,6 +2056,10 @@ In this task you will setup a Kubernetes Ingress to take advantage of path-based
 3. From the Kubernetes dashboard, under **Discovery and Load Balancing**, select **Services**, then copy the IP Address for the **External endpoints** for the ingress-controller-nginx service.
 
    ![A screenshot of the Kubernetes management dashboard showing the ingress controller settings.](media/Ex4-Task5.5.png)
+    
+    > **Note**: To see the load balancer, ensure that you are able to access **All namespaces** (left-hand menu).
+
+    > ![Ensuring that all namespaces are accessible within the Kubernetes dashboard.](media/NamespaceConfiguration.PNG)
 
     > **Note**: Alternately, you can find the IP using the following command in Azure Cloud Shell.
     >
