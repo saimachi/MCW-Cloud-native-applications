@@ -530,7 +530,7 @@ In this task, you will configure the `web` container to communicate with the API
 4. Observe that the `contentApiUrl` variable can be set with an environment variable.
 
    ```javascript
-   const contentApiUrl = process.env.CONTENT_API_URL || "http://localhost:3001";
+   const contentApiUrl = process.env.CONTENT_API_URL || "http://[VM Public IP]:3001";
    ```
 
 5. Open the Dockerfile for editing using Vim and press the `i` key to go into edit mode.
