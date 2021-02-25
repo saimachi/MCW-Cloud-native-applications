@@ -783,11 +783,11 @@ In this task, you will push images to your ACR account, version images with tagg
 
 8. In the Azure Portal, navigate to your ACR account, and select **Repositories** under **Services** on the left-hand menu. You will now see two, one for each image.
 
-   ![In this screenshot, content-api and content-web each appear on their own lines below Repositories.](media/image68.png "Search for repositories")
+   ![In this screenshot, content-api and content-web each appear on their own lines below Repositories.](media/repository-list.png "Search for repositories")
 
 9. Select `content-api`. You will see the latest tag is assigned.
 
-   ![In this screenshot, content-api is selected under Repositories, and the Tags blade appears on the right.](media/image69.png "View latest repo tags")
+   ![In this screenshot, content-api is selected under Repositories, and the Tags blade appears on the right.](media/content-api-latest-image.png "View latest repo tags")
 
 10. From the cloud shell session attached to the VM, assign the `v1` tag to each image with the following commands. Then list the Docker images to note that there are now two entries for each image: showing the `latest` tag and the `v1` tag. Also note that the image ID is the same for the two entries, as there is only one copy of the image.
 
@@ -797,7 +797,7 @@ In this task, you will push images to your ACR account, version images with tagg
     docker image ls
     ```
 
-    ![In this screenshot of the console window is an example of tags being added and displayed.](media/image70.png "View latest image by tag")
+    ![In this screenshot of the console window is an example of tags being added and displayed.](media/tagged-container-list.png "View latest image by tag")
 
 11. Push the images to your ACR account with the following command:
 
@@ -947,19 +947,19 @@ image and pushes it to your ACR instance automatically.
 
 17. Next, setup the `content-api` workflow. This repository already includes `content-api.yml` located within the `.github/workflows` directory. Open the `.github/workflows/content-api.yml` file for editing.
 
-18. Edit the `resourceGroupName` and `containerRegistry` environment values to replace `[SHORT_SUFFIX]` with your own three-letter suffix so that it matches your container registry's name and resource group.
+18. Edit the `resourceGroupName`, `containerRegistry`, and `containerRegistryName` environment values to replace `[SHORT_SUFFIX]` with your own three-letter suffix so that it matches your container registry's name and resource group.
 
     ![The screenshot shows the content-api.yml with the environment variables highlighted.](media/2020-08-25-15-59-56.png "content-api.yml environment variables highlighted")
 
-19. Save the file, then navigate to the repositories in GitHub, select Actions, and then manually run the **content-api** workflow.
-
-20. Commit and push the changes to the Git repository:
+19. Commit and push the changes to the Git repository:
 
    ```bash
    git add .
    git commit -m "Updated workflow YAML"
    git push
    ```
+
+20. Save the file, then navigate to the repositories in GitHub, select Actions, and then manually run the **content-api** workflow.
 
 ## Exercise 2: Migrate MongoDB to Cosmos DB using Azure Database Migration Service
 
