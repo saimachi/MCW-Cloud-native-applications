@@ -365,7 +365,7 @@ In this task, you clone your newly created repository from GitHub so you can wor
 
 > **Note:** By default Azure VM IP addresses change if they are stopped. You can reserve the IP or set a hostname to avoid issues with connections if you stop the VM.
 
-1. Connect securely to your lab VM using SSH (replace HOST_IP_ADDRESS with IP of your VM). If prompted, enter the passphrase you used when first creating the SSH key.
+1. Connect securely to your lab VM using SSH (replace HOST_IP_ADDRESS with IP of your VM, which can be obtained from the Azure portal). If prompted, enter the passphrase you used when first creating the SSH key.
 
    ```bash
    ssh -i .ssh/fabmedical adminfabmedical@HOST_IP_ADDRESS

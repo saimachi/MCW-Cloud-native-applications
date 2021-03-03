@@ -148,7 +148,7 @@ In this task, you will create a new Dockerfile that will be used to build a cont
 2. Navigate to the `content-api` folder. List the files in the folder with this command. The output should look like the screenshot below.
 
    ```bash
-   cd ../content-api
+   cd ~/Fabmedical/content-api
    ll
    ```
 
@@ -252,7 +252,7 @@ This Dockerfile describes a multi-stage build of the following:
 
 In this task, you will create local Docker images for the application --- one for the API application and another for the web application. Each image will be created via Docker commands that rely on a Dockerfile.
 
-1. From SSH prompt connected to the lab VM, type the following command to view any Docker images on the VM. The list will only contain the MongoDB image downloaded earlier.
+1. From SSH prompt connected to the lab VM, type the following command to view any Docker images on the VM. The list will contain no images.
 
    ```bash
    docker image ls
@@ -586,23 +586,23 @@ In this task, you will use GitHub Actions to build your Docker images and pushes
 
 4. In another browser tab open GitHub, and open your **Fabmedical** repository. Select the **Settings** tab.
 
-2. From the left menu, select **Secrets**.
+5. From the left menu, select **Secrets**.
 
-3. Select the **New repository secret** button.
+6. Select the **New repository secret** button.
 
     ![Settings link, Secrets link, and New secret button are highlighted.](media/2020-08-24-21-45-42.png "GitHub Repository secrets")
 
-4. In the **New secret** form, enter the name `ACR_USERNAME` and for the value, paste in the Azure Container Registry **Username** that was copied previously. Select **Add secret**.
+7. In the **New secret** form, enter the name `ACR_USERNAME` and for the value, paste in the Azure Container Registry **Username** that was copied previously. Select **Add secret**.
 
     ![New secret screen with values are entered.](media/2020-08-24-21-48-54.png "New secret screen")
 
-5. Add another Secret, by entering the name `ACR_PASSWORD` and for the value, paste in the Azure Container Registry **Password** that was copied previously.
+8. Add another Secret, by entering the name `ACR_PASSWORD` and for the value, paste in the Azure Container Registry **Password** that was copied previously.
 
     ![Secrets screen with both the ACR_USERNAME and ACR_PASSWORD secrets created.](media/2020-08-24-21-51-24.png "Secrets screen")
 
-6. On your lab VM, navigate to the main `Fabmedical/.github/workflows` directory which contains our existing GitHub Actions defintions.
+9. On your lab VM, navigate to the main `Fabmedical/.github/workflows` directory which contains our existing GitHub Actions defintions.
 
-7. We next need to  create the GitHub Action definition for our `content-web` container. If you are using Visual Studio Code you can simply create a new file, otherwise with Vim do the following:
+10. We next need to  create the GitHub Action definition for our `content-web` container. If you are using Visual Studio Code you can simply create a new file, otherwise with Vim do the following:
 
     ```dotnetcli
     vi content-web.yml
@@ -626,8 +626,8 @@ In this task, you will use GitHub Actions to build your Docker images and pushes
       # Configure workflow to also support triggering manually
       workflow_dispatch:
 
-    # Environment variables are defined so that they can be used throughout the job definitions.
-    env:
+   # Environment variables are defined so that they can be used throughout the job definitions.
+   env:
       imageRepository: 'content-web'
       resourceGroupName: 'fabmedical-[SHORT_SUFFIX]'
       containerRegistryName: 'fabmedical[SHORT_SUFFIX]'
@@ -664,11 +664,11 @@ In this task, you will use GitHub Actions to build your Docker images and pushes
             tags: |
               ${{ env.containerRegistry }}/${{ env.imageRepository }}:${{ env.tag }}
               ${{ env.containerRegistry }}/${{ env.imageRepository }}:latest
-    ```
+   ```
 
-10. Save the file and exit Vi by pressing `<Esc>` then `:wq`.
+11. Save the file and exit Vi by pressing `<Esc>` then `:wq`.
 
-11. Save the pipeline YAML, then commit and push it to the Git repository:
+12. Save the pipeline YAML, then commit and push it to the Git repository:
 
     ```bash
     git add .
@@ -676,37 +676,45 @@ In this task, you will use GitHub Actions to build your Docker images and pushes
     git push
     ```
 
-12. In GitHub, return to the **Fabmedical** repository screen, and select the **Actions** tab.
+13. In GitHub, return to the **Fabmedical** repository screen, and select the **Actions** tab.
 
-13. On the **Actions** page, select the **content-web** workflow.
+14. On the **Actions** page, select the **content-web** workflow.
 
-14. On the **content-web** workflow, select **Run workflow** and manually trigger the workflow to execute.
+15. On the **content-web** workflow, select **Run workflow** and manually trigger the workflow to execute.
 
     ![The content-web Action is shown with the Actions, content-web, and Run workflow links highlighted.](media/2020-08-25-15-38-06.png "content-web workflow")
 
-15. After a second, the newly triggered workflow execution will display in the list. Select the new **content-web** execution to view its status.
+16. After a second, the newly triggered workflow execution will display in the list. Select the new **content-web** execution to view its status.
 
-16. Selecting the **Build and Push Docker Image** job of the workflow will display its execution status.
+17. Selecting the **Build and Push Docker Image** job of the workflow will display its execution status.
 
     ![Build and Push Docker Image job.](media/2020-08-25-15-42-11.png "Build and Push Docker Image job")
 
-17. Next, setup the `content-api` workflow. This repository already includes `content-api.yml` located within the `.github/workflows` directory. Open the `.github/workflows/content-api.yml` file for editing.
+18. Next, setup the `content-api` workflow. This repository already includes `content-api.yml` located within the `.github/workflows` directory. Open the `.github/workflows/content-api.yml` file for editing.
 
-18. Edit the `resourceGroupName` and `containerRegistry` environment values to replace `[SHORT_SUFFIX]` with your own three-letter suffix so that it matches your container registry's name and resource group.
+19. Edit the `resourceGroupName`, `containerRegistry`, and `containerRegistryName` (if applicable) environment values to replace `[SHORT_SUFFIX]` with your own three-letter suffix so that it matches your container registry's name and resource group.
 
     ![The screenshot shows the content-api.yml with the environment variables highlighted.](media/2020-08-25-15-59-56.png "content-api.yml environment variables highlighted")
 
-19. Save the file, then navigate to the repositories in GitHub, select Actions, and then manually run the **content-api** workflow.
+20. Save the file, commit and push, then navigate to the repositories in GitHub, select Actions, and then manually run the **content-api** workflow.
 
-20. Next, setup the **content-init** workflow. Follow the same steps as the previous `content-api` workflow for the `content-init.yml` file, remembering to update the `[SHORT_SUFFIX]` value with your own three-letter suffix.
+21. Next, setup the **content-init** workflow. Follow the same steps as the previous `content-api` workflow for the `content-init.yml` file, remembering to update the `[SHORT_SUFFIX]` value with your own three-letter suffix.
 
-21. Commit and push the changes to the Git repository:
+22. Commit and push the changes to the Git repository:
 
    ```bash
    git add .
    git commit -m "Updated workflow YAML"
    git push
    ```
+
+23. Navigate to your Azure Container Registry instance in Azure portal. Under **Services**, select **Repositories**. You should now see three repositories:
+
+   ![The screenshot demonstrates the images pushed to ACR by GitHub Actions.](./media/view-repositories.png "ACR image repositories")
+
+24. Select a repository, perhaps **content-api**. You should observe two tags.
+
+   ![The screenshot shows the tags for the content-api image.](./media/content-api-tags.png "content-api tags")
 
 ## Exercise 2: Migrate MongoDB to Cosmos DB using Azure Database Migration Service
 
@@ -796,9 +804,9 @@ In this task, you will create a **Migration project** within Azure Database Migr
 
     ![Select source tab with values selected for the MongoDB server.](media/dms-select-source.png "MongoDB to Azure Database for CosmosDB - Select source")
 
-5. Select **Next: Select target >>**. This may take some time to complete as the Migration Service attempts to connect to the MongoDB instance on the lab VM.
+6. Select **Next: Select target >>**. This may take some time to complete as the Migration Service attempts to connect to the MongoDB instance on the lab VM.
 
-6. On the **Select target** tab, select the following values:
+7. On the **Select target** tab, select the following values:
 
     - Mode: **Select Cosmos DB target**
 
