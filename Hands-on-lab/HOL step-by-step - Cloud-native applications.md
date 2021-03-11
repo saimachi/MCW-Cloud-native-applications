@@ -35,7 +35,8 @@ Microsoft and the trademarks listed at https://www.microsoft.com/en-us/legal/int
     - [Task 2: Create Docker images](#task-2-create-docker-images)
     - [Task 3: Run a containerized application](#task-3-run-a-containerized-application)
     - [Task 4: Setup environment variables](#task-4-setup-environment-variables)
-    - [Task 5: Setup Continous Integration Pipeline to Push Images](#task-5-setup-continous-integration-pipeline-to-build-and-push-images)
+    - [Task 5: Push images to Azure Container Registry](#task-5-push-images-to-azure-container-registry)
+    - [Task 6: Setup Continous Integration Pipeline to Push Images](#task-5-setup-continous-integration-pipeline-to-build-and-push-images)
   - [Exercise 2: Migrate MongoDB to Cosmos DB using Azure Database Migration Service](#exercise-2-migrate-mongodb-to-cosmos-db-using-azure-database-migration-service)
     - [Task 1: Enable Microsoft.DataMigration resource provider](#task-1-enable-microsoftdatamigration-resource-provider)
     - [Task 2: Provision Azure Database Migration Service](#task-2-provision-azure-database-migration-service)
@@ -544,10 +545,6 @@ In this task, you will configure the Web container so that it can use an environ
     ```bash
     curl http://localhost:3000/speakers.html
     ```
-<<<<<<< HEAD:Hands-on-lab/HOL step-by-step - Cloud-native applications.md
-
-13. You can now use a web browser to navigate to the website and successfully view the application at port `3000`. Replace `[LAB_VM_IP]` with the **IP address** of the virtual machine (this is the same IP you have used for SSH).
-=======
 
 13. You can now use a web browser to navigate to the website and successfully view the application at port `3000`. Replace `[BUILDAGENTIP]` with the **IP address** you used previously.
 
@@ -567,7 +564,7 @@ In this task, you will configure the Web container so that it can use an environ
 
     Enter credentials if prompted.
 
-### Task 7: Push images to Azure Container Registry
+### Task 5: Push images to Azure Container Registry
 
 To run containers in a remote environment, you will typically push images to a Docker registry, where you can store and distribute images. Each service will have a repository that can be pushed to and pulled from with Docker commands. Azure Container Registry (ACR) is a managed private Docker registry service based on Docker Registry v2.
 
@@ -622,45 +619,46 @@ In this task, you will push images to your ACR account, version images with tagg
    docker image push [LOGINSERVER]/content-web
    docker image push [LOGINSERVER]/content-api
    ```
->>>>>>> e9c7ad91ed82bf66483c8497fd10530ad0e317ef:Hands-on lab/HOL step-by-step - Cloud-native applications - Developer edition.md
+
+8. In the Azure Portal, navigate to your ACR account, and select **Repositories** under **Services** on the left-hand menu. You will now see two, one for each image.
+
+   ![In this screenshot, content-api and content-web each appear on their own lines below Repositories.](media/image68.png "Search for repositories")
+
+9. Select `content-api`. You will see the latest tag is assigned.
+
+   ![In this screenshot, content-api is selected under Repositories, and the Tags blade appears on the right.](media/image69.png "View latest repo tags")
+
+10. From the cloud shell session attached to the VM, assign the `v1` tag to each image with the following commands. Then list the Docker images to note that there are now two entries for each image: showing the `latest` tag and the `v1` tag. Also note that the image ID is the same for the two entries, as there is only one copy of the image.
 
     ```bash
-    http://[LAB_VM_IP]:3000
-
-    EXAMPLE: http://13.68.113.176:3000
-    ```
-
-   Navigate to the Speakers page and you will see the results.
-
-   ![In this screenshot we see the resulting web application running on a Container on an Azure VM.](media/web-app.png "Speaker page on website.")
-
-
-14. Commit your changes and push to the repository.
-
-    ```bash
-<<<<<<< HEAD:Hands-on-lab/HOL step-by-step - Cloud-native applications.md
-    git add .
-    git commit -m "Setup Environment Variables"
-    git push
-=======
     docker image tag [LOGINSERVER]/content-web:latest [LOGINSERVER]/content-web:v1
     docker image tag [LOGINSERVER]/content-api:latest [LOGINSERVER]/content-api:v1
     docker image ls
->>>>>>> e9c7ad91ed82bf66483c8497fd10530ad0e317ef:Hands-on lab/HOL step-by-step - Cloud-native applications - Developer edition.md
     ```
 
-    Enter credentials if prompted.
+    ![In this screenshot of the console window is an example of tags being added and displayed.](media/image70.png "View latest image by tag")
 
-### Task 5: Setup Continous Integration Pipeline to Build and Push Images
+11. Push the images to your ACR account with the following command:
 
-<<<<<<< HEAD:Hands-on-lab/HOL step-by-step - Cloud-native applications.md
-To run containers in a remote environment, you will typically push images to a Container Registry, where you can store and distribute images. In our scenario each service (web and API) will have a repository in a Registry that can be pushed to and pulled from using standard Docker commands. We will use Azure Container Registry (ACR) which is a managed private Docker registry service based on Docker Registry v2.
-=======
     ```bash
     docker image push [LOGINSERVER]/content-web:v1
     docker image push [LOGINSERVER]/content-api:v1
     ```
->>>>>>> e9c7ad91ed82bf66483c8497fd10530ad0e317ef:Hands-on lab/HOL step-by-step - Cloud-native applications - Developer edition.md
+
+12. Refresh one of the repositories to see the two versions of the image now appear.
+
+    ![In this screenshot, content-api is selected under Repositories, and the Tags blade appears on the right. In the Tags blade, latest and v1 appear under Tags.](media/image71.png "View two versions of image")
+
+13. Run the following commands to pull an image from the repository. Note that the default behavior is to pull images tagged with `latest`. You can pull a specific version using the version tag. Also, note that since the images already exist on the build agent, nothing is downloaded.
+
+    ```bash
+    docker image pull [LOGINSERVER]/content-web
+    docker image pull [LOGINSERVER]/content-web:v1
+    ```
+
+### Task 6: Setup Continous Integration Pipeline to Build and Push Images
+
+To run containers in a remote environment, you will typically push images to a Container Registry, where you can store and distribute images. In our scenario each service (web and API) will have a repository in a Registry that can be pushed to and pulled from using standard Docker commands. We will use Azure Container Registry (ACR) which is a managed private Docker registry service based on Docker Registry v2.
 
 In this task, you will use GitHub Actions to build your Docker images and pushes them to your ACR instance automatically.
 
@@ -1634,6 +1632,8 @@ In this task, you will access and review the various logs and dashboards made av
 
    ![In the Monitoring blade, Insights is highlighted.](media/Ex2-Task8.2.png "Select Insights link")
 
+   >**Note**: You may need to enable insights. If this is the case, you may not have data over a significant time range.
+
 3. Review the various available dashboards and a deeper look at the various metrics and logs available on the Cluster, Nodes, Controllers, and deployed Containers.
 
    ![In this screenshot, the dashboards and blades are shown. Cluster metrics can be reviewed.](media/Ex2-Task8.3.png "Review the dashboard metrics")
@@ -1682,33 +1682,39 @@ At this point, you have deployed a single instance of the web and API service co
 
 In this task, you will increase the number of instances for the API deployment in the AKS Azure Portal blade. While it is deploying, you will observe the changing status.
 
-1. In the AKS blade in the Azure Portal select **Workloads** and then select the **API** deployment.
+1. Switch to the Kubernetes Dashboard.
 
-2. Select **YAML** in the window that loads and scroll down until you find **replicas**. Change the number of replicas to **2**, and then select **Review + save**. When prompted, check **Confirm manifest change** and select **Save**.
+2. From the navigation menu, select **Workloads** -\> **Deployments**, and then select the **API** deployment.
 
-   ![In the edit YAML dialog, 2 is entered in the desired number of replicas.](media/k8s-deploy-scale.png "Setting replicas to 2")
+3. Select the **SCALE** button in the upper-right.
 
-   > **Note**: If the deployment completes quickly, you may not see the deployment Waiting states in the portal, as described in the following steps.
+   ![In the Workloads > Deployments > api bar, the Scale icon is highlighted.](media/image89.png "Scale a resource")
 
-3. From the Replica Set view for the API, you will see it is now deploying and that there is one healthy instance and one pending instance.
+4. Change the number of replicas to **2**, and then select **Scale**.
 
-   ![Replica Sets is selected under Workloads in the navigation menu on the left, and at right, Pods status: 1 pending, 1 running is highlighted. Below that, a red arrow points at the API deployment in the Pods box.](media/image117.png "View replica details")
+   ![In the Scale a Deployment dialog box, 2 is entered in the Desired number of pods box.](media/image116.png "Scale a Deployment dialog")
 
-4. From the navigation menu, select **Workloads**. Note that the api Deployment has an alert and shows a pod count 1 of 2 instances (shown as `1/2`).
+   > **Note**: If the deployment completes quickly, you may not see the deployment Waiting states in the dashboard, as described in the following steps.
 
-   ![In the Deployments box, the api service is highlighted with a grey timer icon at left and a pod count of 1/2 listed at right.](media/image118.png "View api active pods")
+5. From the Replica Set view for the API, you will see it is now deploying and that there is one healthy instance and one pending instance.
 
-   > **Note**: If you receive an error about insufficient CPU that is OK. We will see how to deal with this in the next Task (Hint: you can use the **Insights** option in the AKS Azure Portal to review the **Node** status and view the Kubernetes event logs).
+   ![Replica Sets is selected under Workloads in the navigation menu on the left, and at right, Pods status: 1 pending, 1 running is highlighted. Below that, a red arrow points at the API deployment in the Pods box.](media/image117-dashboard.png "View replica details")
 
-5. From the Navigation menu, select **Workloads**. From this view, note that the health overview in the right panel of this view. You will see the following:
+6. From the navigation menu, select **Deployments**. Note that the api Deployment has an alert and shows a pod count 1 of 2 instances (shown as `1/2`).
 
-   - One Deployment and one Replica Set are each healthy for the web service.
+   ![In the Deployments box, the api service is highlighted with a grey timer icon at left and a pod count of 1/2 listed at right.](media/image118-dashboard.png "View api active pods")
 
-   - The api Deployment and Replica Set are in a warning state.
+   > **Note**: If you receive an error about insufficient CPU that is OK. We will see how to deal with this in the next Task.
 
-   - Two pods are healthy in the 'default' namespace.
+7. From the Navigation menu, select **Workloads**. From this view, note that the health overview in the right panel of this view. You will see the following:
 
-6. Open the Contoso Neuro Conference web application. The application should still work without errors as you navigate to Speakers and Sessions pages.
+   - One deployment and one replica set are each healthy for the web service.
+
+   - Only one of the two pods provisioned for the api service is available. 
+
+   - Three pods in total have been provisioned, though only two are available.
+
+8. Open the Contoso Neuro Conference web application. The application should still work without errors as you navigate to Speakers and Sessions pages.
 
    - Navigate to the `/stats` page. You will see information about the hosting environment including:
 
@@ -1726,12 +1732,7 @@ In this task, you will increase the number of instances for the API deployment i
 
      - **uptime:** The up time for the API service.
 
-<<<<<<< HEAD:Hands-on-lab/HOL step-by-step - Cloud-native applications.md
 ### Task 2: Resolve failed provisioning of replicas
-=======
-   - Refresh the page in the browser, and you can see the hostName change between the two API service instances. The letters after `api-{number}-` in the hostname will change.
-
-### Task 2: Increase service instances beyond available resources
 
 In this task, you will try to increase the number of instances for the API service container beyond available resources in the cluster. You will observe how Kubernetes handles this condition and correct the problem.
 
@@ -1753,38 +1754,13 @@ In this task, you will try to increase the number of instances for the API servi
 
    - Add the following snippet below the `name` property in the container spec:
 
-   ```text
-     ports:
-	    - containerPort: 3001
-	      hostPort: 3001
-   ```
-
-   - Your container spec should now look like this:
-
-   ![Screenshot of the deployment JSON code, with the $.spec.template.spec.containers[0] section highlighted, showing the updated values for containerPort and hostPort, both set to port 3001.](media/image85.png "View container ports")
-
-7. Copy the updated document from notepad into the clipboard. Return to the Kubernetes dashboard, which should still be viewing the **api** deployment.
-
-   - Paste the updated document.
-
-   - Select Update.
->>>>>>> e9c7ad91ed82bf66483c8497fd10530ad0e317ef:Hands-on lab/HOL step-by-step - Cloud-native applications - Developer edition.md
-
-In this task, you will resolve the failed API replicas. These failures occur due to the clusters' inability to meet the requested resources.
-
-1. In the AKS blade in the Azure Portal select **Workloads** and then select the **API** deployment. Select the **YAML** navigation item.
-
-2. In the **YAML** screen scroll down and change the following items:
-
-   - Modify **ports** and remove the **hostPort**. Two Pods cannot map to the same host port.
-
       ```yaml
       ports:
          - containerPort: 3001
-         protocol: TCP
+           protocol: TCP
       ```
 
-   - Modify the **cpu** and set it to **100m**. CPU is divided between all Pods on a Node.
+   - In addition, modify the **cpu** and set it to **100m** (from **1**). CPU is divided between all Pods on a Node.
 
       ```yaml
       resources:
@@ -1792,14 +1768,12 @@ In this task, you will resolve the failed API replicas. These failures occur due
             cpu: 100m
             memory: 128Mi
       ```
+   - Your container spec should now look like this:
 
-   Select **Review + save** and, when prompted, confirm the changes and select **Save**.
+   ![Screenshot of the deployment JSON code, with the $.spec.template.spec.containers[0] section highlighted, showing the updated value for containerPort, set to port 3001.](media/port-and-cpu-config.png "View container ports")
 
-   ![In the edit YAML dialog, showing two changes required.](media/2021-02-17_10-26-33.png "Modify deployment manifest")
 
-3. Return to the **Workloads** main view on the AKS Azure Portal and you will now see that the Deployment is healthy with two Pods operating.
-
-   ![In the Workload view with the API deployment highlighted.](media/2021-02-17_10-48-19.png "API deployment is now healthy")
+7. Return to the **Workloads** main view on the AKS Dashboard and you will now see that the API deployment is healthy with two Pods operating.
 
 ### Task 3: Restart containers and test High Availability
 
@@ -1809,35 +1783,33 @@ In this task, you will restart containers and validate that the restart does not
 
    ![The Stats page is visible in this screenshot of the Contoso Neuro web application.](media/image123.png "Contoso web task details")
 
-2. In the AKS blade in the Azure Portal open the api Deployment and increase the required replica count to `4`. Use the same process as Exercise 4, Task 1.
+2. From the navigation menu, select **Workloads** -> **Deployments**. From Deployments list, select the **API** deployment.
 
-   ![In the left menu the Deployments item is selected. The API deployment is highlighted in the Deployments list box.](media/2021-02-17_10-53-46.png "API pod deployments")
+   ![In the left menu the Deployments item is selected. The API deployment is highlighted in the Deployments list box.](media/image124.png "API pod deployments")
 
-3. After a few moments you will find that the API deployment is now running 4 replicas successfully.
+3. From the API deployment view, select **Scale** and from the dialog presented, and enter `4` for the desired number of pods. Select **Scale**.
 
-4. Return to the browser tab with the web application stats page loaded. Refresh the page over and over. You will not see any errors, but you will see the api host name change between the two api pod instances periodically. The task id and pid might also change between the two api pod instances.
+4. After a few moments you will find that the API deployment is now running 4 replicas successfully.
+
+5. Return to the browser tab with the web application stats page loaded. Refresh the page over and over. You will not see any errors, but you will see the api host name change between the four api pod instances periodically. The task id and pid might also change between the api pod instances. This image shows the stats page change between two successive attempts.
 
    ![On the Stats page in the Contoso Neuro web application, two different api host name values are highlighted.](media/image126.png "View web task hostname")
 
-6. After refreshing enough times to see that the `hostName` value is changing, and the service remains healthy, you can open the **Replica Sets** view for the API in the Azure Portal.
+6. After refreshing enough times to see that the `hostName` value is changing, and the service remains healthy, you can open the **Replica Sets** view for the API in the Kubernetes dashboard. Select the replica set with the four pods.
 
-7. On this view you can see the hostName value shown in the web application stats page matches the pod names for the pods that are running.
+   ![Selecting the correct replica set for analysis in the Kubernetes dashboard.](./media/correct-replica-set.png "View replica sets")
 
-   ![Viewing replica set in the Azure Portal.](media/image128.png "Viewing replica set in the Azure Portal")
+7. Select two of the Pods at random and choose **Delete**. To delete a pod, you will first need to select the three dots.
 
-8. Select two of the Pods at random and choose **Delete**.
+8. Kubernetes will launch new Pods to meet the required replica count. Depending on your view you may see the old instances Terminating and new instances being Created.
 
-   ![The context menu for a pod in the pod list is expanded with the Delete item selected.](media/2021-02-17_11-04-35.png "Delete running pod instance")
+   ![Old pods are terminating and new pods are forming, as demonstrated in the AKS dashboard.](media/new-pods-for-replicaset.png "API Pods changing state")
 
-9. Kubernetes will launch new Pods to meet the required replica count. Depending on your view you may see the old instances Terminating and new instances being Created.
+9. Return to the API Deployment and scale it back to `1` replica. See Step 3 above for how to do this if you are unsure.
 
-   ![The first row of the Pods box is highlighted, and the pod has a green check mark and is running.](media/2021-02-17_11-05-59.png "API Pods changing state")
+10. Return to the sample web site's stats page in the browser and refresh while Kubernetes is scaling down the number of Pods. You will notice that only one API host name shows up, even though you may still see several running pods in the API replica set view. Even though several pods are running, Kubernetes will no longer send traffic to the pods it has selected to terminate. In a few moments, only one pod will show in the API Replica Set view.
 
-10. Return to the API Deployment and scale it back to `1` replica. See Step 2 above for how to do this if you are unsure.
-
-11. Return to the sample web site's stats page in the browser and refresh while Kubernetes is scaling down the number of Pods. You will notice that only one API host name shows up, even though you may still see several running pods in the API replica set view. Even though several pods are running, Kubernetes will no longer send traffic to the pods it has selected to terminate. In a few moments, only one pod will show in the API Replica Set view.
-
-    ![Replica Sets is selected under Workloads in the navigation menu on the left. On the right are the Details and Pods boxes. Only one API host name, which has a green check mark and is listed as running, appears in the Pods box.](media/image131.png "View replica details")
+    ![Replica Sets is selected under Workloads in the navigation menu on the left. On the right are the Details and Pods boxes. Only one API host name, which has a green check mark and is listed as running, appears in the Pods box.](media/one-pod-remains.png "View replica details")
 
 ### Task 4: Configure Cosmos DB Autoscale
 
